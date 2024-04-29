@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { PrismaService } from './database/prisma.service';
 
 interface BodyPost {
@@ -36,6 +44,15 @@ export class AppController {
         id: Number(id),
       },
       data: bodyPatch,
+    });
+  }
+
+  @Delete('categoria/:id')
+  async categoriaDelete(@Param('id') id: number) {
+    return await this.prisma.categoria.delete({
+      where: {
+        id: Number(id),
+      },
     });
   }
 }
