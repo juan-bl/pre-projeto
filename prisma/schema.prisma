@@ -8,18 +8,18 @@ datasource db {
 }
 
 model Categoria {
-  id Int @id @default(autoincrement())
-  nome String
-  createAt DateTime @default(now())
-  tarefas Tarefas[]
+  id       Int       @id @default(autoincrement())
+  nome     String
+  createAt DateTime  @default(now())
+  tarefas  Tarefas[]
 }
 
 model Tarefas {
-  id Int @id @default(autoincrement())
-  nome String
-  isActivate Boolean @default(true)
-  categoria Categoria? @relation(fields: [categoriaId], references: [id])
+  id          Int        @id @default(autoincrement())
+  nome        String
+  isActivate  Boolean    @default(true)
+  categoria   Categoria? @relation(fields: [categoriaId], references: [id])
   categoriaId Int?
-  createAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createAt    DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }
