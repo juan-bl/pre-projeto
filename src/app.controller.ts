@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Post } from '@nestjs/common';
 import { PrismaService } from './database/prisma.service';
 
 @Controller()
@@ -15,6 +15,15 @@ export class AppController {
     return await this.prisma.categoria.findUnique({
       where: {
         id: Number(id),
+      },
+    });
+  }
+
+  @Post('categoria')
+  async categoriaPost() {
+    return await this.prisma.categoria.create({
+      data: {
+        nome: 'testeManual',
       },
     });
   }
