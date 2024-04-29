@@ -1,6 +1,9 @@
-import { Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { PrismaService } from './database/prisma.service';
 
+interface BodyPost {
+  nome: string;
+}
 @Controller()
 export class AppController {
   constructor(private prisma: PrismaService) {}
@@ -20,11 +23,9 @@ export class AppController {
   }
 
   @Post('categoria')
-  async categoriaPost() {
+  async categoriaPost(@Body() bodyPost: BodyPost) {
     return await this.prisma.categoria.create({
-      data: {
-        nome: 'testeManual',
-      },
+      data: bodyPost,
     });
   }
 }
