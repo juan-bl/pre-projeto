@@ -10,7 +10,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { PrismaService } from './database/prisma.service';
-import { BodyPost } from './dtos/validacoes';
+import { BodyPost, BodyPostTarefa } from './dtos/validacoes';
 
 @Controller()
 export class AppController {
@@ -27,6 +27,9 @@ export class AppController {
       const resultado = await this.prisma.categoria.findUnique({
         where: {
           id: Number(id),
+        },
+        include: {
+          tarefas: true,
         },
       });
 
@@ -71,6 +74,79 @@ export class AppController {
   async categoriaDelete(@Param('id') id: number) {
     try {
       return await this.prisma.categoria.delete({
+        where: {
+          id: Number(id),
+        },
+      });
+    } catch (error) {
+      return new HttpException(
+        'O número do id informado não existe',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Get('tarefas')
+  async tarefasGet() {
+    return await this.prisma.tarefas.findMany();
+  }
+
+  @Get('tarefa/:id')
+  async tarefasId(@Param('id') id: number) {
+    try {
+      const resultado = await this.prisma.tarefas.findUnique({
+        where: {
+          id: Number(id),
+        },
+        include: {
+          categoria: true,
+        },
+      });
+
+      if (!resultado) {
+        throw new HttpException('', HttpStatus.BAD_REQUEST);
+      }
+
+      return resultado;
+    } catch (error) {
+      return new HttpException(
+        'O número do id informado não existe',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Post('tarefa')
+  async tarefaPost(@Body() bodyPost: BodyPostTarefa) {
+    return await this.prisma.tarefas.create({
+      data: bodyPost,
+    });
+  }
+
+  @Patch('tarefa/:id')
+  async tarefaPatch(
+    @Param('id') id: number,
+    @Body() bodyPatch: BodyPostTarefa,
+  ) {
+    try {
+      return await this.prisma.tarefas.update({
+        where: {
+          id: Number(id),
+        },
+        data: bodyPatch,
+      });
+    } catch (error) {
+      return new HttpException(
+        'O número do id informado não existe',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Delete('tarefa/:id')
+  async tarefaDelete(@Param('id') id: number) {
+    try {
+      return await this.prisma.tarefas.delete({
         where: {
           id: Number(id),
         },
