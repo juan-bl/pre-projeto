@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpException,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -22,11 +23,24 @@ export class AppController {
 
   @Get('categoria/:id')
   async categoriaId(@Param('id') id: number) {
-    return await this.prisma.categoria.findUnique({
-      where: {
-        id: Number(id),
-      },
-    });
+    try {
+      const resultado = await this.prisma.categoria.findUnique({
+        where: {
+          id: Number(id),
+        },
+      });
+
+      if (!resultado) {
+        throw new HttpException('', HttpStatus.BAD_REQUEST);
+      }
+
+      return resultado;
+    } catch (error) {
+      return new HttpException(
+        'O número do id informado não existe',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
   @Post('categoria')
@@ -38,31 +52,34 @@ export class AppController {
 
   @Patch('categoria/:id')
   async categoriaPatch(@Param('id') id: number, @Body() bodyPatch: BodyPost) {
-    return await this.prisma.categoria.update({
-      where: {
-        id: Number(id),
-      },
-      data: bodyPatch,
-    });
+    try {
+      return await this.prisma.categoria.update({
+        where: {
+          id: Number(id),
+        },
+        data: bodyPatch,
+      });
+    } catch (error) {
+      return new HttpException(
+        'O número do id informado não existe',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
   @Delete('categoria/:id')
   async categoriaDelete(@Param('id') id: number) {
     try {
-      // const checkId = await this.prisma.categoria.findUnique({
-      //   where: {
-      //     id: Number(id),
-      //   },
-      // });
-
       return await this.prisma.categoria.delete({
         where: {
           id: Number(id),
         },
       });
     } catch (error) {
-      console.error(error.code);
-      return new HttpException('O número do id informado não existe', 404);
+      return new HttpException(
+        'O número do id informado não existe',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 }
