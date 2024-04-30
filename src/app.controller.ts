@@ -3,15 +3,14 @@ import {
   Controller,
   Delete,
   Get,
+  HttpException,
   Param,
   Patch,
   Post,
 } from '@nestjs/common';
 import { PrismaService } from './database/prisma.service';
+import { BodyPost } from './dtos/validacoes';
 
-interface BodyPost {
-  nome: string;
-}
 @Controller()
 export class AppController {
   constructor(private prisma: PrismaService) {}
@@ -49,10 +48,21 @@ export class AppController {
 
   @Delete('categoria/:id')
   async categoriaDelete(@Param('id') id: number) {
-    return await this.prisma.categoria.delete({
-      where: {
-        id: Number(id),
-      },
-    });
+    try {
+      // const checkId = await this.prisma.categoria.findUnique({
+      //   where: {
+      //     id: Number(id),
+      //   },
+      // });
+
+      return await this.prisma.categoria.delete({
+        where: {
+          id: Number(id),
+        },
+      });
+    } catch (error) {
+      console.error(error.code);
+      return new HttpException('O número do id informado não existe', 404);
+    }
   }
 }
