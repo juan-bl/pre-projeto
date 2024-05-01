@@ -10,7 +10,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { PrismaService } from './database/prisma.service';
-import { BodyPost, BodyPostTarefa } from './dtos/validacoes';
+import { BodyPatchTarefa, BodyPost, BodyPostTarefa } from './dtos/validacoes';
 
 @Controller()
 export class AppController {
@@ -133,16 +133,32 @@ export class AppController {
   @Patch('tarefa/:id')
   async tarefaPatch(
     @Param('id') id: number,
-    @Body() bodyPatch: BodyPostTarefa,
+    @Body() bodyPatch: BodyPatchTarefa,
   ) {
     try {
-      return await this.prisma.tarefas.update({
+      if (bodyPatch.nome === '' || typeof bodyPatch.nome !== 'string') {
+        return 'O nome não pode estar vazio, ou ser diferente de uma string se for alterar';
+      }
+
+      if (typeof bodyPatch.isActivate !== 'boolean') {
+        return 'O status precisa ser um booleano';
+      }
+
+      if (typeof bodyPatch.categoriaId !== 'number') {
+        return 'O status precisa ser um numero';
+      }
+
+      const patchTarefas = await this.prisma.tarefas.update({
         where: {
           id: Number(id),
         },
         data: bodyPatch,
       });
+
+      return patchTarefas;
     } catch (error) {
+      console.error(error.code);
+
       if (error.code === 'P2003') {
         return new HttpException(
           'O número do id da categoria informado não existe',
