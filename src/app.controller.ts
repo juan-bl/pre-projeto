@@ -118,9 +118,16 @@ export class AppController {
 
   @Post('tarefa')
   async tarefaPost(@Body() bodyPost: BodyPostTarefa) {
-    return await this.prisma.tarefas.create({
-      data: bodyPost,
-    });
+    try {
+      return await this.prisma.tarefas.create({
+        data: bodyPost,
+      });
+    } catch (error) {
+      return new HttpException(
+        'O número do id da categoria informado não existe',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
   @Patch('tarefa/:id')
@@ -136,8 +143,15 @@ export class AppController {
         data: bodyPatch,
       });
     } catch (error) {
+      if (error.code === 'P2003') {
+        return new HttpException(
+          'O número do id da categoria informado não existe',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
       return new HttpException(
-        'O número do id informado não existe',
+        'O número do id informado não existe', //P2025
         HttpStatus.BAD_REQUEST,
       );
     }
