@@ -10,7 +10,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { PrismaService } from './database/prisma.service';
-import { BodyPatchTarefa, BodyPost, BodyPostTarefa } from './dtos/validacoes';
+import {
+  BodyPatch,
+  BodyPatchTarefa,
+  BodyPost,
+  BodyPostTarefa,
+} from './dtos/validacoes';
 
 @Controller()
 export class AppController {
@@ -54,8 +59,28 @@ export class AppController {
   }
 
   @Patch('categoria/:id')
-  async categoriaPatch(@Param('id') id: number, @Body() bodyPatch: BodyPost) {
+  async categoriaPatch(@Param('id') id: number, @Body() bodyPatch: BodyPatch) {
     try {
+      // const verificarId = await this.prisma.categoria.findUnique({
+      //   where: {
+      //     id: Number(id),
+      //   },
+      // });
+
+      // if (!verificarId) {
+      //   return new HttpException(
+      //     'O id da categoria não existe ou não é um número valido.',
+      //     HttpStatus.BAD_REQUEST,
+      //   );
+      // }
+
+      if (bodyPatch.nome === '' || typeof bodyPatch.nome !== 'string') {
+        return {
+          message:
+            'O nome não pode estar vazio, ou ser diferente de uma string se for alterar',
+        };
+      }
+
       return await this.prisma.categoria.update({
         where: {
           id: Number(id),
@@ -137,15 +162,24 @@ export class AppController {
   ) {
     try {
       if (bodyPatch.nome === '' || typeof bodyPatch.nome !== 'string') {
-        return 'O nome não pode estar vazio, ou ser diferente de uma string se for alterar';
+        return new HttpException(
+          'O nome não pode estar vazio, ou ser diferente de uma string se for alterar',
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       if (typeof bodyPatch.isActivate !== 'boolean') {
-        return 'O status precisa ser um booleano';
+        return new HttpException(
+          'O isActivate precisa ser um booleano se for alterar',
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       if (typeof bodyPatch.categoriaId !== 'number') {
-        return 'O status precisa ser um numero';
+        return new HttpException(
+          'A categoriaId precisa ser um numero se for alterar',
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       const patchTarefas = await this.prisma.tarefas.update({
@@ -157,8 +191,6 @@ export class AppController {
 
       return patchTarefas;
     } catch (error) {
-      console.error(error.code);
-
       if (error.code === 'P2003') {
         return new HttpException(
           'O número do id da categoria informado não existe',
@@ -167,7 +199,7 @@ export class AppController {
       }
 
       return new HttpException(
-        'O número do id informado não existe', //P2025
+        'O número do id informado ma requisição não existe', //P2025
         HttpStatus.BAD_REQUEST,
       );
     }

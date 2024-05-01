@@ -1,4 +1,4 @@
-import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
+import { IsBoolean, IsInt, IsNotEmpty, IsString } from 'class-validator';
 
 export class BodyPost {
   @IsNotEmpty({
@@ -10,20 +10,33 @@ export class BodyPost {
   nome: string;
 }
 
+export class BodyPatch {
+  nome: string;
+}
+
 export class BodyPostTarefa {
+  @IsNotEmpty({
+    message: 'É obrigatorio informar o >nome<.',
+  })
   @IsString({
-    message: 'O nome precisa ser uma string.',
+    message: 'O valor de >nome< precisa ser uma string.',
   })
   nome: string;
 
   @IsNotEmpty({
-    message: 'É obrigatorio informar um valor booleano.',
+    message: 'É obrigatorio informar o >isActivate<.',
   })
   @IsBoolean({
-    message: 'O valor precisa ser um booleano "true" ou "false"',
+    message: 'O valor de >isAcitivate< precisa ser um booleano.',
   })
   isActivate: boolean;
 
+  @IsNotEmpty({
+    message: 'É obrigatorio informar o >categoriaId<.',
+  })
+  @IsInt({
+    message: 'O valor de >categoriaId< precisa ser um numero inteiro.',
+  })
   categoriaId: number;
 }
 export class BodyPatchTarefa {
