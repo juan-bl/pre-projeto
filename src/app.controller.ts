@@ -61,19 +61,6 @@ export class AppController {
   @Patch('categoria/:id')
   async categoriaPatch(@Param('id') id: number, @Body() bodyPatch: BodyPatch) {
     try {
-      // const verificarId = await this.prisma.categoria.findUnique({
-      //   where: {
-      //     id: Number(id),
-      //   },
-      // });
-
-      // if (!verificarId) {
-      //   return new HttpException(
-      //     'O id da categoria não existe ou não é um número valido.',
-      //     HttpStatus.BAD_REQUEST,
-      //   );
-      // }
-
       if (bodyPatch.nome === '' || typeof bodyPatch.nome !== 'string') {
         return {
           message:
@@ -144,6 +131,15 @@ export class AppController {
   @Post('tarefa')
   async tarefaPost(@Body() bodyPost: BodyPostTarefa) {
     try {
+      if (bodyPost.categoriaId) {
+        if (typeof bodyPost.categoriaId !== 'number') {
+          return new HttpException(
+            'A categoriaId precisa ser um numero.',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+      }
+
       return await this.prisma.tarefas.create({
         data: bodyPost,
       });
@@ -161,25 +157,42 @@ export class AppController {
     @Body() bodyPatch: BodyPatchTarefa,
   ) {
     try {
-      if (bodyPatch.nome === '' || typeof bodyPatch.nome !== 'string') {
+      if (
+        bodyPatch.nome === undefined &&
+        bodyPatch.isActivate === undefined &&
+        bodyPatch.categoriaId === undefined
+      ) {
         return new HttpException(
-          'O nome não pode estar vazio, ou ser diferente de uma string se for alterar',
+          'Para realizar o update é priciso informar pelo menos um dado a ser atualizado.',
           HttpStatus.BAD_REQUEST,
         );
       }
 
-      if (typeof bodyPatch.isActivate !== 'boolean') {
-        return new HttpException(
-          'O isActivate precisa ser um booleano se for alterar',
-          HttpStatus.BAD_REQUEST,
-        );
+      if (bodyPatch.nome) {
+        if (bodyPatch.nome === '' || typeof bodyPatch.nome !== 'string') {
+          return new HttpException(
+            'O nome não pode estar vazio, ou ser diferente de uma string se for alterar',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
       }
 
-      if (typeof bodyPatch.categoriaId !== 'number') {
-        return new HttpException(
-          'A categoriaId precisa ser um numero se for alterar',
-          HttpStatus.BAD_REQUEST,
-        );
+      if (bodyPatch.isActivate) {
+        if (typeof bodyPatch.isActivate !== 'boolean') {
+          return new HttpException(
+            'O isActivate precisa ser um booleano se for alterar',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+      }
+
+      if (bodyPatch.categoriaId) {
+        if (typeof bodyPatch.categoriaId !== 'number') {
+          return new HttpException(
+            'A categoriaId precisa ser um numero se for alterar',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
       }
 
       const patchTarefas = await this.prisma.tarefas.update({
